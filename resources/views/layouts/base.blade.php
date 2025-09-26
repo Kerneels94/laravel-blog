@@ -16,6 +16,9 @@
         @yield('content')
     </main>
 
+
+
+    
     @if ($location == "home")
         <div class="min-h-screen bg-gray-50">
 
