@@ -13,19 +13,19 @@ abstract class Controller
     {
         try {
             if (empty($email) || empty($password)) {
-                // Look for proper status to return
-                return response()->json(["message" => "Email or password empty"], 404);
+                return response()->json(["message" => "Email or password empty"], 400);
             }
 
-            $data = DB::table('users')->get()->where("email", $email)->first();
+            $data = DB::table('users')->where("email", $email)->first();
 
-            if (!empty($users) && $email === $data["email"] && password_verify($password, $data["password"])) {
+            if ($data && password_verify($password, $data->password)) {
+                // Successful login
                 return redirect("/dashboard");
             }
 
-            return response()->json(["User logged in"], 200);
+            return response()->json(["message" => "Invalid email or password"], 401);
         } catch (Exception $e) {
-            return $e->getMessage();
+            return response()->json(["error" => $e->getMessage()], 500);
         }
     }
 
@@ -33,18 +33,37 @@ abstract class Controller
     {
         try {
             if (empty($email) || empty($password)) {
-                // Look for proper status to return
                 return response()->json(["message" => "Email or password empty"], 404);
             }
 
-            DB::table('users')->insert([
+            $data = DB::table('users')->insert([
                 "email" => $email ?? "",
                 "password" => hash::make($password) ?? "",
                 "name" => $name ?? "",
                 "created_at" => Date("Y-m-d"),
             ]);
 
-            return response()->json(["User logged in"], 200);
+            if ($data) {
+                return response()->json(["User created"], 200);
+            }
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+    public static function forgetPassword(string $email, string $password)
+    {
+        try {
+            if (empty($email)) {
+                return response()->json(["message" => "Email empty"], 404);
+            }
+
+            $userEmail = DB::table("users")->select("email")->where('email', $email)->first();
+
+            if ($email === $userEmail->email) {
+                DB::table("users")->where("email", $email)->update(["password" => hash::make($password)]);
+                return response()->json(["message" => "Password updated"], 200);
+            }
         } catch (Exception $e) {
             return $e->getMessage();
         }

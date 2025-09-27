@@ -42,10 +42,10 @@
             </button>
         </form>
 
-        {{-- <p class="text-sm text-gray-600 text-center mt-4">
+        <p class="text-sm text-gray-600 text-center mt-4">
             Already have an account?
             <a href="{{ route('login') }}" class="text-blue-600 hover:underline">Login</a>
-        </p> --}}
+        </p>
     </div>
 </div>
 
